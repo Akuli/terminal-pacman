@@ -105,7 +105,8 @@ class UI:
 
         picture_list = self.player_pics[self.player.direction]
         picture = picture_list[self.player.animation_counter % len(picture_list)]
-        self.player.animation_counter += 1
+        if self.player.moving or self.player.animation_counter % len(picture_list) != 0:
+            self.player.animation_counter += 1
 
         for line_y, line in enumerate(picture, start=first_y):
             # Handle wrapping around, line can show in two places
@@ -124,18 +125,23 @@ class UI:
     def handle_key(self, key):
         if key == curses.KEY_RIGHT:
             self.player.next_direction = "right"
+            self.player.moving = True
         if key == curses.KEY_LEFT:
             self.player.next_direction = "left"
+            self.player.moving = True
         if key == curses.KEY_UP:
             self.player.next_direction = "up"
+            self.player.moving = True
         if key == curses.KEY_DOWN:
             self.player.next_direction = "down"
+            self.player.moving = True
 
         self.player.move()
 
 
 def main(stdscr: curses._CursesWindow):
     curses.curs_set(0)
+    stdscr.timeout(100)
     ui = UI(stdscr)
     while True:
         stdscr.clear()

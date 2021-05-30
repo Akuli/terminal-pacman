@@ -11,7 +11,7 @@ class Player:
         self.y_move_amount = y_move_amount
         self.direction = "right"
         self.next_direction = None
-        self.moving = True
+        self.moving = False
         self.animation_counter = 0
 
     def _get_integer_point(self, x, y):
@@ -50,7 +50,7 @@ class Player:
             crosses_boundary = self.y - self.y_move_amount < boundary <= self.y
             crossed_point = (self.x, self.y - self.y_move_amount)
         else:
-            raise ValueError(self.direction)
+            raise ValueError(repr(direction))
 
         return (has_wall, crosses_boundary, boundary_point, crossed_point)
 
@@ -76,14 +76,16 @@ class Player:
                 # Switch direction if a wall isn't in the way
                 self.x, self.y = map(Fraction, boundary_point)
                 if (
+                    self.next_direction is not None and 
                     self.direction != self.next_direction
                     and not self._get_move_info(self.next_direction)[0]
                 ):
                     self.direction = self.next_direction
                     return
 
-                # Keep going in this direction if a wall isn't in the way
                 if has_wall:
+                    # stuck
+                    self.moving = False
                     return
 
             self.x, self.y = crossed_point
