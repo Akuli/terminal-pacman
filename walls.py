@@ -47,19 +47,18 @@ class Walls:
     def remove(self, wall):
         self._all_walls.remove(wall)
 
-
-def show(walls):
-    for y in range(10*height):
-        for x in range(4*width):
-            if walls.has_wall_below(normalize(x, y)):
-                print('_', end='')
-            else:
-                print(' ', end='')
-            if walls.has_wall_to_right(normalize(x, y)):
-                print('|', end='')
-            else:
-                print(' ', end='')
-        print('')
+    def debug_print(self):
+        for y in range(height):
+            for x in range(width):
+                if self.has_wall_below(normalize(x, y)):
+                    print('_', end='')
+                else:
+                    print(' ', end='')
+                if self.has_wall_to_right(normalize(x, y)):
+                    print('|', end='')
+                else:
+                    print(' ', end='')
+            print('')
 
 
 def get_containing_area(walls, starting_point):
@@ -120,4 +119,3 @@ def make_connected(walls: Walls):
 random.seed(1)
 walls = Walls()
 make_connected(walls)
-show(walls)
