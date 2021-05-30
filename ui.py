@@ -1,4 +1,5 @@
 from __future__ import annotations
+from fractions import Fraction
 import core
 import curses
 
@@ -74,7 +75,7 @@ class UI:
 
     def __init__(self, stdscr):
         self.player_pics = load_player_pics()
-        self.player = core.Player()
+        self.player = core.Player(walls, Fraction(2, x_spacing), Fraction(1, y_spacing))
         self.stdscr = stdscr
 
     def draw_grid(self):
@@ -110,17 +111,15 @@ class UI:
 
     def handle_key(self, key):
         if key == curses.KEY_RIGHT:
-            self.player.direction = 'right'
-            self.player.x += 2 / x_spacing
+            self.player.next_direction = 'right'
         if key == curses.KEY_LEFT:
-            self.player.direction = 'left'
-            self.player.x -= 2 / x_spacing
+            self.player.next_direction = 'left'
         if key == curses.KEY_UP:
-            self.player.direction = 'up'
-            self.player.y -= 1 / y_spacing
+            self.player.next_direction = 'up'
         if key == curses.KEY_DOWN:
-            self.player.direction = 'down'
-            self.player.y += 1 / y_spacing
+            self.player.next_direction = 'down'
+
+        self.player.move()
 
 
 def main(stdscr: curses._CursesWindow):
