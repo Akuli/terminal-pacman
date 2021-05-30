@@ -38,6 +38,9 @@ pacman_height = 5
 x_spacing = pacman_width + 1
 y_spacing = pacman_height + 1
 
+PLAYER = 1
+WALL = 2
+
 
 def load_player_pics():
     chunks = [
@@ -85,18 +88,20 @@ class UI:
         self.stdscr = stdscr
 
     def draw_grid(self):
+        attrs = curses.color_pair(WALL)
+
         for x in range(self.walls.width):
             for y in range(self.walls.height + 1):
                 if self.walls.has_wall_above((x, y % self.walls.height)):
                     self.stdscr.addstr(
-                        y_spacing * y, x_spacing * x + 1, "-" * pacman_width
+                        y_spacing * y, x_spacing * x + 1, "-" * pacman_width, attrs
                     )
 
         for x in range(self.walls.width + 1):
             for y in range(self.walls.height):
                 if self.walls.has_wall_to_left((x % self.walls.width, y)):
                     for screen_y in range(y_spacing * y + 1, y_spacing * (y + 1)):
-                        self.stdscr.addstr(screen_y, x_spacing * x, "|")
+                        self.stdscr.addstr(screen_y, x_spacing * x, "|", attrs)
 
     def draw_player(self):
         # Chosen so that 'player.x += width' does not affect what shows on screen
@@ -120,7 +125,7 @@ class UI:
 
                 for x in x_list:
                     for y in y_list:
-                        self.stdscr.addstr(y, x, char)
+                        self.stdscr.addstr(y, x, char, curses.color_pair(1))
 
     def handle_key(self, key):
         if key == curses.KEY_RIGHT:
@@ -140,6 +145,8 @@ class UI:
 
 
 def main(stdscr: curses._CursesWindow):
+    curses.init_pair(PLAYER, curses.COLOR_WHITE, curses.COLOR_BLACK)
+    curses.init_pair(WALL, curses.COLOR_CYAN, curses.COLOR_BLACK)
     curses.curs_set(0)
     stdscr.timeout(100)
     ui = UI(stdscr)
