@@ -12,6 +12,7 @@ class Player:
         self.direction = "right"
         self.next_direction = None
         self.moving = True
+        self.animation_counter = 0
 
     def _get_integer_point(self, x, y):
         if isinstance(x, Fraction):

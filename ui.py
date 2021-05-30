@@ -103,9 +103,11 @@ class UI:
         first_x = round(self.player.x * x_spacing + 1) % (self.walls.width * x_spacing)
         first_y = round(self.player.y * y_spacing + 1)
 
-        for line_y, line in enumerate(
-            self.player_pics[self.player.direction][0], start=first_y
-        ):
+        picture_list = self.player_pics[self.player.direction]
+        picture = picture_list[self.player.animation_counter % len(picture_list)]
+        self.player.animation_counter += 1
+
+        for line_y, line in enumerate(picture, start=first_y):
             # Handle wrapping around, line can show in two places
             line_y %= self.walls.height * y_spacing
             y_list = [0, self.walls.height * y_spacing] if line_y == 0 else [line_y]
