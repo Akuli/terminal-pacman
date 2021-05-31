@@ -8,25 +8,25 @@ import core
 from walls import Walls
 
 _PICTURE_STRING = r"""
- .--.    .--.    .--.    .--.
-/  o \  /o|  \  / o  \  /    \
-\  --/  \    /  \--  /  \ |o /
- '--'    '--'    '--'    '--'
+ .--. : .--. : .--. : .--. :
+/  o \:/o|  \:/ o  \:/    \:
+\  --/:\    /:\--  /:\ |o /:
+ '--' : '--' : '--' : '--' :
 
- .--.    .  .    .--.    .--.
-/  o'   /o`' \   `o  \  /    \
-\  '-,  \    /  .-'  /  \ ,.o/
- '--'    '--'    '--'    '  '
+ .--. : .  . : .--. : .--. :
+/  o' :/o`' \: `o  \:/    \:
+\  '-,:\    /:.-'  /:\ ,.o/:
+ '--' : '--' : '--' : '  ' :
 
- .--.            .--.    .--.
-/  o/   /o\,/\   \o  \  /    \
-\  \    \    /    /  /  \/^\o/
- '--'    '--'    '--'
+ .--. :      : .--. : .--. :
+/  o/ :/o\,/\: \o  \:/    \:
+\  \  :\    /:  /  /:\/^\o/:
+ '--' : '--' : '--' :      :
 
- .-.              ,-.    .--.
-/  p    -o----    q  \  /    \
-\  |    \    /    |  /  ----o-
- '-'     '--'     `-'
+ .-.  :      :  ,-. : .--. :
+/  p  :-o----:  q  \:/    \:
+\  |  :\    /:  |  /:----o-:
+ '-'  : '--' :  `-' :      :
 """
 
 player_width = 6
@@ -42,15 +42,7 @@ WALL = 2
 
 def load_player_pics() -> dict[str, list[list[str]]]:
     chunks = [
-        [
-            [
-                line.ljust(player_width * 4 + len("  ") * 3)[
-                    offset : offset + player_width
-                ]
-                for offset in (n * (player_width + 2) for n in (0, 1, 2, 3))
-            ]
-            for line in chunk.splitlines()
-        ]
+        [line.rstrip(":").split(":") for line in chunk.splitlines()]
         for chunk in _PICTURE_STRING.strip("\n").split("\n\n")
     ]
 
