@@ -1,5 +1,5 @@
 # terminal-pacman
-This PacMan game clone runs on terminal.
+This PacMan game clone runs entirely on a terminal or command prompt.
 
 ![Screenshot](screenshot.png)
 
