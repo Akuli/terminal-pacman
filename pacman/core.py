@@ -5,7 +5,7 @@ from fractions import Fraction
 from math import ceil, floor
 from typing import Tuple
 
-from walls import Walls
+from .walls import Walls
 
 
 def _opposite(direction: str) -> str:

@@ -6,8 +6,8 @@ import time
 from fractions import Fraction
 from typing import Sequence, Tuple
 
-import core
-from walls import Walls
+from . import core
+from .walls import Walls
 
 image_width = 6
 image_height = 4

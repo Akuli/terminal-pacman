@@ -4,7 +4,7 @@ if ! which black isort mypy >/dev/null; then
     echo "can't find stuff, is venv active?"
     exit 1
 fi
-black *.py "$@" || error=yes
-isort *.py "$@" || error=yes
-mypy --strict *.py || error=yes
+black pacman/ "$@" || error=yes
+isort pacman/ "$@" || error=yes
+mypy --strict pacman/ || error=yes
 [ "$error" != yes ] || exit 1
