@@ -79,7 +79,6 @@ class UI:
         self.walls = Walls(
             (screen_width - 1) // x_spacing, (screen_height - 1) // y_spacing
         )
-        self.walls.remove_walls_until_connected()
 
         self.player_pics = load_player_pics()
         self.player = core.Player(

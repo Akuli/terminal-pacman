@@ -8,12 +8,13 @@ class Walls:
     def __init__(self, width: int, height: int):
         self.width = width
         self.height = height
-        self._all_walls = {
+        self._all_walls = set(random.sample({
             (direction, (x, y))
             for direction in {"right", "down"}
             for x in range(width)
             for y in range(height)
-        }
+        }, width * height // 2))
+        self._remove_walls_until_connected()
 
     def _normalize(self, x: int, y: int) -> Tuple[int, int]:
         return (x % self.width, y % self.height)
@@ -84,7 +85,7 @@ class Walls:
 
         return seen
 
-    def remove_walls_until_connected(self) -> None:
+    def _remove_walls_until_connected(self) -> None:
         while True:
             point_to_area_id = {}
             missing = {(x, y) for x in range(self.width) for y in range(self.height)}
