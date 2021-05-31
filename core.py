@@ -1,20 +1,27 @@
+from __future__ import annotations
+
 from fractions import Fraction
 from math import ceil, floor
+from typing import Tuple
+
+from walls import Walls
 
 
 class Player:
-    def __init__(self, walls, x_move_amount: Fraction, y_move_amount: Fraction):
+    def __init__(self, walls: Walls, x_move_amount: Fraction, y_move_amount: Fraction):
         self.walls = walls
-        self.x = 0
-        self.y = 0
+        self.x = Fraction(0)
+        self.y = Fraction(0)
         self.x_move_amount = x_move_amount
         self.y_move_amount = y_move_amount
         self.direction = "right"
-        self.next_direction = None
+        self.next_direction: str | None = None
         self.moving = False
         self.animation_counter = 0
 
-    def _get_integer_point(self, x, y):
+    def _get_integer_point(
+        self, x: Fraction | int, y: Fraction | int
+    ) -> Tuple[int, int]:
         if isinstance(x, Fraction):
             assert x.denominator == 1
             x = x.numerator
@@ -24,7 +31,9 @@ class Player:
 
         return (x % self.walls.width, y % self.walls.height)
 
-    def _get_move_info(self, direction):
+    def _get_move_info(
+        self, direction: str
+    ) -> Tuple[bool, bool, Tuple[int, int], Tuple[Fraction, Fraction]]:
         if direction == "right":
             boundary = ceil(self.x)
             boundary_point = self._get_integer_point(boundary, self.y)
@@ -54,7 +63,7 @@ class Player:
 
         return (has_wall, crosses_boundary, boundary_point, crossed_point)
 
-    def move(self):
+    def move(self) -> None:
         if self.moving:
             # Opposite direction is always possible
             if (self.direction, self.next_direction) in {
@@ -63,6 +72,7 @@ class Player:
                 ("up", "down"),
                 ("down", "up"),
             }:
+                assert self.next_direction is not None
                 self.direction = self.next_direction
 
             (
@@ -76,8 +86,8 @@ class Player:
                 # Switch direction if a wall isn't in the way
                 self.x, self.y = map(Fraction, boundary_point)
                 if (
-                    self.next_direction is not None and 
-                    self.direction != self.next_direction
+                    self.next_direction is not None
+                    and self.direction != self.next_direction
                     and not self._get_move_info(self.next_direction)[0]
                 ):
                     self.direction = self.next_direction

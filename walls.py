@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 import random
+from typing import Tuple
 
 
 class Walls:
-    def __init__(self, width, height):
+    def __init__(self, width: int, height: int):
         self.width = width
         self.height = height
         self._all_walls = {
@@ -12,24 +15,24 @@ class Walls:
             for y in range(height)
         }
 
-    def _normalize(self, x, y):
+    def _normalize(self, x: int, y: int) -> Tuple[int, int]:
         return (x % self.width, y % self.height)
 
-    def has_wall_to_right(self, point):
+    def has_wall_to_right(self, point: Tuple[int, int]) -> bool:
         return ("right", point) in self._all_walls
 
-    def has_wall_to_left(self, point):
+    def has_wall_to_left(self, point: Tuple[int, int]) -> bool:
         x, y = point
         return self.has_wall_to_right(self._normalize(x - 1, y))
 
-    def has_wall_below(self, point):
+    def has_wall_below(self, point: Tuple[int, int]) -> bool:
         return ("down", point) in self._all_walls
 
-    def has_wall_above(self, point):
+    def has_wall_above(self, point: Tuple[int, int]) -> bool:
         x, y = point
         return self.has_wall_below(self._normalize(x, y - 1))
 
-    def _get_second_point(self, wall):
+    def _get_second_point(self, wall: Tuple[str, Tuple[int, int]]) -> Tuple[int, int]:
         direction, (x, y) = wall
         if direction == "right":
             return self._normalize(x + 1, y)
@@ -37,7 +40,7 @@ class Walls:
             return self._normalize(x, y + 1)
         raise ValueError(direction)
 
-    def debug_print(self):
+    def debug_print(self) -> None:
         for y in range(self.height):
             for x in range(self.width):
                 if self.has_wall_below(self._normalize(x, y)):
@@ -50,7 +53,9 @@ class Walls:
                     print(" ", end="")
             print("")
 
-    def _get_containing_area(self, starting_point):
+    def _get_containing_area(
+        self, starting_point: Tuple[int, int]
+    ) -> set[Tuple[int, int]]:
         points_to_visit = {starting_point}
         seen = {starting_point}
 
@@ -79,7 +84,7 @@ class Walls:
 
         return seen
 
-    def remove_walls_until_connected(self):
+    def remove_walls_until_connected(self) -> None:
         while True:
             point_to_area_id = {}
             missing = {(x, y) for x in range(self.width) for y in range(self.height)}

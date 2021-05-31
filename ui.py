@@ -42,7 +42,7 @@ PLAYER = 1
 WALL = 2
 
 
-def load_player_pics():
+def load_player_pics() -> dict[str, list[list[str]]]:
     chunks = [
         [
             [
@@ -56,7 +56,7 @@ def load_player_pics():
         for chunk in _PICTURE_STRING.strip("\n").split("\n\n")
     ]
 
-    picture_lists = {
+    picture_lists: dict[str, list[list[str]]] = {
         "left": [],
         "right": [],
         "up": [],
@@ -72,12 +72,12 @@ def load_player_pics():
     return picture_lists
 
 
-def count_leading_spaces(string):
+def count_leading_spaces(string: str) -> int:
     return len(string) - len(string.lstrip(" "))
 
 
 class UI:
-    def __init__(self, stdscr):
+    def __init__(self, stdscr: curses._CursesWindow):
         self.walls = Walls(7, 3)
         self.walls.remove_walls_until_connected()
 
@@ -87,7 +87,7 @@ class UI:
         )
         self.stdscr = stdscr
 
-    def draw_grid(self):
+    def draw_grid(self) -> None:
         attrs = curses.color_pair(WALL)
 
         for x in range(self.walls.width):
@@ -103,7 +103,7 @@ class UI:
                     for screen_y in range(y_spacing * y + 1, y_spacing * (y + 1)):
                         self.stdscr.addstr(screen_y, x_spacing * x, "|", attrs)
 
-    def draw_player(self):
+    def draw_player(self) -> None:
         # Chosen so that 'player.x += width' does not affect what shows on screen
         first_x = round(self.player.x * x_spacing + 1) % (self.walls.width * x_spacing)
         first_y = round(self.player.y * y_spacing + 1)
@@ -127,7 +127,7 @@ class UI:
                     for y in y_list:
                         self.stdscr.addstr(y, x, char, curses.color_pair(1))
 
-    def handle_key(self, key):
+    def handle_key(self, key: int | str) -> None:
         if key == curses.KEY_RIGHT:
             self.player.next_direction = "right"
             self.player.moving = True
@@ -144,7 +144,7 @@ class UI:
         self.player.move()
 
 
-def main(stdscr: curses._CursesWindow):
+def main(stdscr: curses._CursesWindow) -> None:
     curses.init_pair(PLAYER, curses.COLOR_WHITE, curses.COLOR_BLACK)
     curses.init_pair(WALL, curses.COLOR_CYAN, curses.COLOR_BLACK)
     curses.curs_set(0)

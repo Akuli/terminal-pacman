@@ -1,0 +1,10 @@
+#!/bin/sh
+# Can be used in two ways, './lint' or './lint --check'
+if ! which black isort mypy >/dev/null; then
+    echo "can't find stuff, is venv active?"
+    exit 1
+fi
+black *.py "$@" || error=yes
+isort *.py "$@" || error=yes
+mypy --strict *.py || error=yes
+[ "$error" != yes ] || exit 1
