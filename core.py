@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import random
 from fractions import Fraction
 from math import ceil, floor
 from typing import Tuple
@@ -7,7 +8,19 @@ from typing import Tuple
 from walls import Walls
 
 
-class Player:
+def _opposite(direction: str) -> str:
+    if direction == "left":
+        return "right"
+    if direction == "right":
+        return "left"
+    if direction == "up":
+        return "down"
+    if direction == "down":
+        return "up"
+    raise ValueError(direction)
+
+
+class GameObject:
     def __init__(self, walls: Walls, x_move_amount: Fraction, y_move_amount: Fraction):
         self.walls = walls
         self.x = Fraction(0)
@@ -15,8 +28,6 @@ class Player:
         self.x_move_amount = x_move_amount
         self.y_move_amount = y_move_amount
         self.direction = "right"
-        self.next_direction: str | None = None
-        self.moving = False
         self.animation_counter = 0
 
     def _get_integer_point(
@@ -63,16 +74,17 @@ class Player:
 
         return (has_wall, crosses_boundary, boundary_point, crossed_point)
 
+
+class Player(GameObject):
+    def __init__(self, walls: Walls, x_move_amount: Fraction, y_move_amount: Fraction):
+        super().__init__(walls, x_move_amount, y_move_amount)
+        self.next_direction: str | None = None
+        self.moving = False
+
     def move(self) -> None:
         if self.moving:
             # Opposite direction is always possible
-            if (self.direction, self.next_direction) in {
-                ("left", "right"),
-                ("right", "left"),
-                ("up", "down"),
-                ("down", "up"),
-            }:
-                assert self.next_direction is not None
+            if self.next_direction == _opposite(self.direction):
                 self.direction = self.next_direction
 
             (
@@ -99,3 +111,48 @@ class Player:
                     return
 
             self.x, self.y = crossed_point
+
+
+class Enemy(GameObject):
+    def __init__(self, walls: Walls, x_move_amount: Fraction, y_move_amount: Fraction):
+        super().__init__(walls, x_move_amount, y_move_amount)
+        self.x = Fraction(walls.width // 2)
+        self.y = Fraction(walls.height // 2)
+        self._just_turned = False
+
+    def move(self) -> None:
+        (
+            has_wall,
+            crosses_boundary,
+            boundary_point,
+            crossed_point,
+        ) = self._get_move_info(self.direction)
+
+        if crosses_boundary and not self._just_turned:
+            self.x, self.y = map(Fraction, boundary_point)
+            next_direction = random.choice(
+                [
+                    direction
+                    for direction in ["left", "right", "up", "down"]
+                    if not self._get_move_info(direction)[0]  # not hit wall
+                ]
+            )
+            if self.direction == next_direction:
+                self.x, self.y = crossed_point
+                self._just_turned = False
+            else:
+                self.direction = next_direction
+                self._just_turned = True
+        else:
+            self.x, self.y = crossed_point
+            self._just_turned = False
+
+
+def _manhattan_distance(
+    x1: Fraction, y1: Fraction, x2: Fraction, y2: Fraction
+) -> Fraction:
+    return abs(x1 - x2) + abs(y1 - y2)
+
+
+def collision_check(player: Player, enemy: Enemy) -> bool:
+    return _manhattan_distance(player.x, player.y, enemy.x, enemy.y) < 0.9

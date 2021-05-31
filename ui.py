@@ -1,13 +1,18 @@
 from __future__ import annotations
 
 import curses
+import sys
 import time
 from fractions import Fraction
+from typing import Sequence, Tuple
 
 import core
 from walls import Walls
 
-_PICTURE_STRING = r"""
+image_width = 6
+image_height = 4
+
+_PLAYER_ASCII_ART = r"""
  .--. : .--. : .--. : .--. :
 /  o \:/o | \:/ o  \:/    \:
 \  --/:\    /:\--  /:\ | o/:
@@ -29,37 +34,39 @@ _PICTURE_STRING = r"""
  '-'  : '--' :  `-' :      :
 """
 
-player_width = 6
-player_height = 4
+_ENEMY_STRING = r"""
+  __
+ /oo\
+ |--|
+/    \
+"""
+_ENEMY_PIC = [
+    line.ljust(image_width) for line in _ENEMY_STRING.strip("\n").splitlines()
+]
 
 # Account for walls of 1 character
-x_spacing = player_width + 1
-y_spacing = player_height + 1
+x_spacing = image_width + 1
+y_spacing = image_height + 1
 
 PLAYER = 1
 WALL = 2
 
 
-def load_player_pics() -> dict[str, list[list[str]]]:
+def get_player_pics(direction: str) -> list[Tuple[str, ...]]:
     chunks = [
         [line.rstrip(":").split(":") for line in chunk.splitlines()]
-        for chunk in _PICTURE_STRING.strip("\n").split("\n\n")
+        for chunk in _PLAYER_ASCII_ART.strip("\n").split("\n\n")
     ]
 
-    picture_lists: dict[str, list[list[str]]] = {
-        "left": [],
-        "right": [],
-        "up": [],
-        "down": [],
-    }
+    result = []
     for chunk in chunks:
-        for direction, *picture in zip(["right", "up", "left", "down"], *chunk):
-            picture_lists[direction].append(picture)
+        index = ["right", "up", "left", "down"].index(direction)
+        picture = list(zip(*chunk))[index]
+        result.append(picture)
 
     # Repeat the same pictures in reverse to animate
-    for picture_list in picture_lists.values():
-        picture_list.extend(picture_list[1:-1][::-1])
-    return picture_lists
+    result.extend(result[1:-1][::-1])
+    return result
 
 
 def count_leading_spaces(string: str) -> int:
@@ -73,8 +80,10 @@ class UI:
             (screen_width - 1) // x_spacing, (screen_height - 1) // y_spacing
         )
 
-        self.player_pics = load_player_pics()
         self.player = core.Player(
+            self.walls, Fraction(2, x_spacing), Fraction(1, y_spacing)
+        )
+        self.enemy = core.Enemy(
             self.walls, Fraction(2, x_spacing), Fraction(1, y_spacing)
         )
         self.stdscr = stdscr
@@ -86,7 +95,7 @@ class UI:
             for y in range(self.walls.height + 1):
                 if self.walls.has_wall_above((x, y % self.walls.height)):
                     self.stdscr.addstr(
-                        y_spacing * y, x_spacing * x + 1, "-" * player_width, attrs
+                        y_spacing * y, x_spacing * x + 1, "-" * image_width, attrs
                     )
 
         for x in range(self.walls.width + 1):
@@ -95,14 +104,15 @@ class UI:
                     for screen_y in range(y_spacing * y + 1, y_spacing * (y + 1)):
                         self.stdscr.addstr(screen_y, x_spacing * x, "|", attrs)
 
-    def draw_player(self) -> None:
+    def _draw_game_object(
+        self, obj: core.GameObject, picture_list: Sequence[Sequence[str]]
+    ) -> None:
         # Chosen so that 'player.x += width' does not affect what shows on screen
-        first_x = round(self.player.x * x_spacing + 1) % (self.walls.width * x_spacing)
-        first_y = round(self.player.y * y_spacing + 1)
+        first_x = round(obj.x * x_spacing + 1) % (self.walls.width * x_spacing)
+        first_y = round(obj.y * y_spacing + 1)
 
-        picture_list = self.player_pics[self.player.direction]
-        picture = picture_list[self.player.animation_counter % len(picture_list)]
-        if self.player.moving or self.player.animation_counter % len(picture_list) != 0:
+        picture = picture_list[obj.animation_counter % len(picture_list)]
+        if self.player.moving or obj.animation_counter % len(picture_list) != 0:
             self.player.animation_counter += 1
 
         for line_y, line in enumerate(picture, start=first_y):
@@ -118,6 +128,10 @@ class UI:
                 for x in x_list:
                     for y in y_list:
                         self.stdscr.addstr(y, x, char, curses.color_pair(1))
+
+    def draw_game_objects(self) -> None:
+        self._draw_game_object(self.player, get_player_pics(self.player.direction))
+        self._draw_game_object(self.enemy, [_ENEMY_PIC])
 
     def handle_key(self, key: int | str) -> None:
         if key == curses.KEY_RIGHT:
@@ -144,9 +158,10 @@ def main(stdscr: curses._CursesWindow) -> None:
 
     while True:
         ui.player.move()
+        ui.enemy.move()
         stdscr.clear()
         ui.draw_grid()
-        ui.draw_player()
+        ui.draw_game_objects()
         stdscr.refresh()
 
         while True:
@@ -163,6 +178,9 @@ def main(stdscr: curses._CursesWindow) -> None:
 
             if key == curses.ERR:  # timed out
                 break
+
+        if core.collision_check(ui.player, ui.enemy):
+            sys.exit("You died :(")
 
 
 if __name__ == "__main__":
