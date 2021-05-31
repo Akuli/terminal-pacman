@@ -7,36 +7,33 @@ import core
 from walls import Walls
 
 _PICTURE_STRING = r"""
-  .----.      .----.      .----.      .----.
- /   o  \    /   |  \    /  o   \    /      \
-|    ----   | o      |   ----    |  |      o |
- \      /    \      /    \      /    \  |   /
-  `----'      `----'      `----'      `----'
+ .---.    .-.-.    .---.    .---.
+/   o \  /o |  \  / o   \  /     \
+\   --/  \     /  \--   /  \  |o /
+ '---'    '---'    '---'    '-'-'
 
-  .----.      .    .      .----.      .----.
- /   o .'    / \__/ \    `. o   \    /      \
-|     ^     | o      |     ^     |  |   __ o |
- \    `-,    \      /    .-'    /    \ /  \ /
-  `----'      `----'      `----'      `    '
+ .---.    .   .    .---.    .---.
+/   o'   /o'-' \   `o   \  /     \
+\   '-,  \     /  .-'   /  \ ,-.o/
+ '---'    '---'    '---'    '   '
 
-  .----.                  .----.      .----.
- /   o/      /\    /\      \o   \    /      \
-|    (      | o`--'  |      )    |  |  .--.o |
- \    \      \      /      /    /    \/    \/
-  `----'      `----'      `----'
+ .---.             .---.    .---.
+/   o/   /o\,,/\   \o   \  /     \
+\   \    \     /    /   /  \/^^\o/
+ '---'    '---'    '---'
 
-  .---                      ---.      .----.
- /   p                      q   \    /      \
-|    |      ,-o------.      |    |  `------o-'
- \   |       \      /       |   /
-  `---        `----'        ---'
+ .--.               ,--.    .---.
+/   p    -o-----    q   \  /     \
+\   |    \     /    |   /  -----o-
+ '--'     '---'     `--'
 """
-pacman_width = 10
-pacman_height = 5
+
+player_width = 7
+player_height = 4
 
 # Account for walls of 1 character
-x_spacing = pacman_width + 1
-y_spacing = pacman_height + 1
+x_spacing = player_width + 1
+y_spacing = player_height + 1
 
 PLAYER = 1
 WALL = 2
@@ -46,10 +43,10 @@ def load_player_pics() -> dict[str, list[list[str]]]:
     chunks = [
         [
             [
-                line.ljust(pacman_width * 4 + len("  ") * 3)[
-                    offset : offset + pacman_width
+                line.ljust(player_width * 4 + len("  ") * 3)[
+                    offset : offset + player_width
                 ]
-                for offset in (n * (pacman_width + 2) for n in (0, 1, 2, 3))
+                for offset in (n * (player_width + 2) for n in (0, 1, 2, 3))
             ]
             for line in chunk.splitlines()
         ]
@@ -78,7 +75,10 @@ def count_leading_spaces(string: str) -> int:
 
 class UI:
     def __init__(self, stdscr: curses._CursesWindow):
-        self.walls = Walls(7, 3)
+        screen_height, screen_width = stdscr.getmaxyx()
+        self.walls = Walls(
+            (screen_width - 1) // x_spacing, (screen_height - 1) // y_spacing
+        )
         self.walls.remove_walls_until_connected()
 
         self.player_pics = load_player_pics()
@@ -94,7 +94,7 @@ class UI:
             for y in range(self.walls.height + 1):
                 if self.walls.has_wall_above((x, y % self.walls.height)):
                     self.stdscr.addstr(
-                        y_spacing * y, x_spacing * x + 1, "-" * pacman_width, attrs
+                        y_spacing * y, x_spacing * x + 1, "-" * player_width, attrs
                     )
 
         for x in range(self.walls.width + 1):
