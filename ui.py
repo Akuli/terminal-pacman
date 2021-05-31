@@ -157,18 +157,20 @@ def main(stdscr: curses._CursesWindow) -> None:
         ui.draw_player()
         stdscr.refresh()
 
-        key = None
-        while key != curses.ERR:
+        while True:
             key = stdscr.getch()
+            if key == ord("q"):
+                return
+            ui.handle_key(key)
+
             if key == curses.ERR:  # timed out
                 next_timeout += 0.080
-            elif key == ord("q"):
-                return
-            else:
-                ui.handle_key(key)
 
             remaining_ms = round((next_timeout - time.time()) * 1000)
             stdscr.timeout(max(1, remaining_ms))
+
+            if key == curses.ERR:  # timed out
+                break
 
 
 if __name__ == "__main__":
