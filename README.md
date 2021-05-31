@@ -1,5 +1,7 @@
 # terminal-pacman
-PacMan game clone that runs on terminal
+This PacMan game clone runs on terminal.
+
+![Screenshot](screenshot.png)
 
 
 ## Running the game
@@ -7,17 +9,18 @@ PacMan game clone that runs on terminal
 ```
 git clone https://github.com/Akuli/terminal-pacman
 cd terminal-pacman
+python3 -m venv env
+source env/bin/activate      # On Windows:  env\Scripts\activate, without source
+pip install -r requirements.txt
 python3 -m pacman
 ```
 
 ## Developing
 
-In `terminal-pacman` folder, cloned as above:
+In `terminal-pacman` folder, cloned as above, with venv active:
 
 ```
-python3 -m venv env
-. env/bin/activate
 pip install -r requirements-dev.txt
 ```
 
-Run `./lint` to check and format code.
+Run `./lint` to run all linters at once (doesn't work on Windows).
