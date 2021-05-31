@@ -106,7 +106,10 @@ class UI:
                         self.stdscr.addstr(screen_y, x_spacing * x, "|", attrs)
 
     def _draw_game_object(
-        self, obj: core.GameObject, picture_list: Sequence[Sequence[str]],color_pair_num: int
+        self,
+        obj: core.GameObject,
+        picture_list: Sequence[Sequence[str]],
+        color_pair_num: int,
     ) -> None:
         # Chosen so that 'player.x += width' does not affect what shows on screen
         first_x = round(obj.x * x_spacing + 1) % (self.walls.width * x_spacing)
@@ -128,10 +131,14 @@ class UI:
 
                 for x in x_list:
                     for y in y_list:
-                        self.stdscr.addstr(y, x, char, curses.color_pair(color_pair_num))
+                        self.stdscr.addstr(
+                            y, x, char, curses.color_pair(color_pair_num)
+                        )
 
     def draw_game_objects(self) -> None:
-        self._draw_game_object(self.player, get_player_pics(self.player.direction), PLAYER)
+        self._draw_game_object(
+            self.player, get_player_pics(self.player.direction), PLAYER
+        )
         self._draw_game_object(self.enemy, [_ENEMY_PIC], ENEMY)
 
     def handle_key(self, key: int | str) -> None:
