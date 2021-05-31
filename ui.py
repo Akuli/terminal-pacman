@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import curses
+import time
 from fractions import Fraction
 
 import core
@@ -140,25 +141,34 @@ class UI:
             self.player.next_direction = "down"
             self.player.moving = True
 
-        self.player.move()
-
 
 def main(stdscr: curses._CursesWindow) -> None:
     curses.init_pair(PLAYER, curses.COLOR_WHITE, curses.COLOR_BLACK)
     curses.init_pair(WALL, curses.COLOR_CYAN, curses.COLOR_BLACK)
     curses.curs_set(0)
-    stdscr.timeout(100)
+    stdscr.timeout(1)  # 0 is special
     ui = UI(stdscr)
+    next_timeout = time.time()
+
     while True:
+        ui.player.move()
         stdscr.clear()
         ui.draw_grid()
         ui.draw_player()
         stdscr.refresh()
 
-        key = stdscr.getch()
-        if key == ord("q"):
-            break
-        ui.handle_key(key)
+        key = None
+        while key != curses.ERR:
+            key = stdscr.getch()
+            if key == curses.ERR:  # timed out
+                next_timeout += 0.080
+            elif key == ord("q"):
+                return
+            else:
+                ui.handle_key(key)
+
+            remaining_ms = round((next_timeout - time.time()) * 1000)
+            stdscr.timeout(max(1, remaining_ms))
 
 
 if __name__ == "__main__":
