@@ -155,4 +155,4 @@ def _manhattan_distance(
 
 
 def collision_check(player: Player, enemy: Enemy) -> bool:
-    return _manhattan_distance(player.x, player.y, enemy.x, enemy.y) < 0.9
+    return _manhattan_distance(player.x, player.y, enemy.x, enemy.y) < 0.95

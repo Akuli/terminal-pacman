@@ -50,6 +50,7 @@ y_spacing = image_height + 1
 
 PLAYER = 1
 WALL = 2
+ENEMY = 3
 
 
 def get_player_pics(direction: str) -> list[Tuple[str, ...]]:
@@ -105,7 +106,7 @@ class UI:
                         self.stdscr.addstr(screen_y, x_spacing * x, "|", attrs)
 
     def _draw_game_object(
-        self, obj: core.GameObject, picture_list: Sequence[Sequence[str]]
+        self, obj: core.GameObject, picture_list: Sequence[Sequence[str]],color_pair_num: int
     ) -> None:
         # Chosen so that 'player.x += width' does not affect what shows on screen
         first_x = round(obj.x * x_spacing + 1) % (self.walls.width * x_spacing)
@@ -127,11 +128,11 @@ class UI:
 
                 for x in x_list:
                     for y in y_list:
-                        self.stdscr.addstr(y, x, char, curses.color_pair(1))
+                        self.stdscr.addstr(y, x, char, curses.color_pair(color_pair_num))
 
     def draw_game_objects(self) -> None:
-        self._draw_game_object(self.player, get_player_pics(self.player.direction))
-        self._draw_game_object(self.enemy, [_ENEMY_PIC])
+        self._draw_game_object(self.player, get_player_pics(self.player.direction), PLAYER)
+        self._draw_game_object(self.enemy, [_ENEMY_PIC], ENEMY)
 
     def handle_key(self, key: int | str) -> None:
         if key == curses.KEY_RIGHT:
@@ -151,6 +152,7 @@ class UI:
 def main(stdscr: curses._CursesWindow) -> None:
     curses.init_pair(PLAYER, curses.COLOR_WHITE, curses.COLOR_BLACK)
     curses.init_pair(WALL, curses.COLOR_CYAN, curses.COLOR_BLACK)
+    curses.init_pair(ENEMY, curses.COLOR_RED, curses.COLOR_BLACK)
     curses.curs_set(0)
     stdscr.timeout(1)  # 0 is special
     ui = UI(stdscr)
